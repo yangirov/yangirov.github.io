@@ -1,0 +1,7 @@
+User-agent: *
+Host: yangirov.online
+Sitemap: https://yangirov.online/sitemap.xml
+
+User-agent: Yandex
+Host: yangirov.online
+Sitemap: https://yangirov.online/sitemap.xml
