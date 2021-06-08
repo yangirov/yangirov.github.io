@@ -1,0 +1,56 @@
+==================================================================
+https://keybase.io/yangirov
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of https://yangirov.ru
+  * I am yangirov (https://keybase.io/yangirov) on keybase.
+  * I have a public key ASCxZ0J9FBkw2z9a_qVJyQUf6g0xgsqNzmyebsM7RNB9nwo
+
+To do so, I am signing this object:
+
+{
+  "body": {
+    "key": {
+      "eldest_kid": "0120b167427d141930db3f5afea549c9051fea0d3182ca8dce6c9e6ec33b44d07d9f0a",
+      "host": "keybase.io",
+      "kid": "0120b167427d141930db3f5afea549c9051fea0d3182ca8dce6c9e6ec33b44d07d9f0a",
+      "uid": "53a3b30d454d8260700645ab97260719",
+      "username": "yangirov"
+    },
+    "merkle_root": {
+      "ctime": 1623137154,
+      "hash": "874808747e56965d06aa033a35d256765c61f2c564e4317c2ac175b63521f663d5d8ec7f2951da61b6f9b5e24a02758d3122f9c8ac37a250baace7288fd6e4a2",
+      "hash_meta": "a3390d3f64b9442b653d4a6e31516e7cf1c8ac978d4a47fd7a661233850cb86e",
+      "seqno": 20137260
+    },
+    "service": {
+      "entropy": "E+THzuFLMYwSI5sGDpG8APAz",
+      "hostname": "yangirov.ru",
+      "protocol": "https:"
+    },
+    "type": "web_service_binding",
+    "version": 2
+  },
+  "client": {
+    "name": "keybase.io go client",
+    "version": "5.6.0"
+  },
+  "ctime": 1623137165,
+  "expire_in": 504576000,
+  "prev": "604af91e20c71f9dc34767d691db680855d4c063727625d740ec8638ac3180ed",
+  "seqno": 14,
+  "tag": "signature"
+}
+
+which yields the signature:
+
+hKRib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEgsWdCfRQZMNs/Wv6lSckFH+oNMYLKjc5snm7DO0TQfZ8Kp3BheWxvYWTESpcCDsQgYEr5HiDHH53DR2fWkdtoCFXUwGNydiXXQOyGOKwxgO3EIAZvlEk4aCRll6jbyGzq6oQ81JNHUYT/ZV0nbXNbFdf0AgHCo3NpZ8RAcJnD/aMEbwQ2qPZG/e0H/dn1WIoOhubPDyfepKeXNBNIAoAPBGHdKR04rPjEOCD4AGZomWbU3SxbOGlBIkzDC6hzaWdfdHlwZSCkaGFzaIKkdHlwZQildmFsdWXEIMc+uW4RSDBwKWvFS3amWRT4OwFqgForbNAhQYgIXI0vo3RhZ80CAqd2ZXJzaW9uAQ==
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/yangirov
+
+==================================================================

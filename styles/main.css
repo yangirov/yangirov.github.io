@@ -1,0 +1,75 @@
+html,
+body {
+    min-height: 100%;
+}
+html {
+    box-sizing: border-box;
+}
+body {
+    height: 100%;
+    font-family: "avenir next", avenir, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 1em;
+    line-height: 1.5;
+    color: #000;
+    background: #fff;
+    background:radial-gradient(ellipse at center, rgba(255,254,234,1) 0%, rgba(255,254,234,1) 35%, #B7E8EB 100%);
+}
+*,
+*::before,
+*::after {
+    box-sizing: inherit;
+    margin: 0;
+    padding: 0
+}
+.container {
+    margin: 0 auto;
+    min-height: 100vh;
+    max-width: 2048px;
+    padding: calc(1rem + 1vw);
+}
+.header {
+    display: flex;
+}
+@media (max-width: 480px) {
+    .header {
+        flex-wrap: wrap;
+    }
+    .header_text {
+        margin-top: 1rem;
+    }
+    .header_subtitle {
+        margin-top: 1rem;
+    }
+}
+.header_photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-right: 1rem;
+}
+.header_subtitle {
+    color: #676767;
+    font-size: 1.5rem;
+}
+.content {
+    margin-top: 1rem;
+    font-size: 1.5rem;
+}
+.content_contacts {
+    list-style: none;
+}
+.contacts_item {
+    display: inline-block;
+    padding: 0.5em 1em 0.5em 0;
+}
+@media (max-width: 480px) {
+    .contacts_item {
+        display: block;
+    }
+}
+a {
+    display: inline-block;
+    color: #007ACC;
+    border-bottom: #BDDEF2 solid 3px;
+    text-decoration: none;
+}
