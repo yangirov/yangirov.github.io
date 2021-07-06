@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+      <v-overlay :value="loading">
+        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+      </v-overlay>
+      
+      <v-app>
+        <v-main>
+          <v-alert 
+            dense
+            text
+            type="success"
+          >
+            <a target="_blank" href="https://vk.com/dev/database.getRegions?params[country_id]=1&params[count]=10&params[v]=5.131">Получить ID региона</a>
+          | <a target="_blank" href="https://vk.com/dev/database.getCities?params[country_id]=1&params[region_id]=1&params[q]=%D0%A3%D1%84%D0%B0&params[need_all]=1&params[count]=1000&params[v]=5.131">Получить ID города</a>
+          | <a target="_blank" href="https://vk.com/dev/utils.resolveScreenName?params[screen_name]=bg140official&params[v]=5.131">Получить ID группы</a>
+          | <a target="_blank" href="https://vk.com/dev/groups.getMembers?params[group_id]=78347250&params[sort]=id_asc&params[offset]=100&params[count]=1000&params[v]=5.131">Получить ID пользователей по ID группы</a>
+          </v-alert>
+
+          <v-banner>
+            <v-row>
+              <v-col lg="2" md="3" sm="4" xs="12">
+                <v-text-field
+                  v-model="region" 
+                  type="number"
+                  placeholder="Region ID" 
+                ></v-text-field>
+              </v-col>
+              <v-col lg="2" md="3" sm="4" xs="12">
+                <v-text-field
+                  v-model="city_id" 
+                  type="number"
+                  placeholder="City ID" 
+                ></v-text-field>
+              </v-col>
+              <v-col lg="2" md="3" sm="4" xs="12">
+                <v-text-field
+                  placeholder="Query"
+                  v-model="query"
+                  width="200"
+                ></v-text-field>
+              </v-col>
+              <v-col lg="2" md="3" sm="4" xs="12">
+                <v-text-field
+                  v-model="count" 
+                  type="number"
+                  placeholder="Groups count" 
+                ></v-text-field>
+              </v-col>
+              <v-col lg="4" md="3" sm="6" xs="8">
+                <v-row class="mt-auto mb-auto">
+                  <v-btn
+                    color="primary"
+                    class="ml-2"
+                    @click="start"
+                  >Найти</v-btn>
+                  <v-btn
+                    color="primary"
+                    class="ml-2 mr-2"
+                    @click="ids = []; cities = []; groups = [];"
+                  >Сбросить</v-btn>
+                  <vue-json-to-csv
+                    :json-data="excelData"
+                    :csv-title="'Список'"
+                  >
+                    <v-btn color="success">
+                      Excel <i class="mdi mdi-export-variant" aria-hidden="true"></i>
+                    </v-btn>
+                  </vue-json-to-csv>
+                </v-row>
+              </v-col>
+            </v-row>
+            <div class="ma-2"> 
+              <div v-show="ids" v-for="id in ids">{{ id }}<br></div>
+            </div>
+          </v-banner>
+        </v-main>
+      </v-app>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+    <script src="./vue-json-to-csv.min.js"></script>
+    
+    <script>
+    const instance = axios.create({
+      baseURL: "https://vk-api-proxy.xtrafrancyz.net/method/"
+    })
+
+    instance.defaults.params = {}
+    instance.defaults.params['access_token'] = "2722f3b14faca96c4d2115f748ccf32c8f90625faf13fcb965388538442ef6ce8af2e74633c71891a9bc5"
+    instance.defaults.params['v'] = "5.131"
+
+    Vue.use(VueJsonToCsv)
+
+    function pushArray(arr, arr2) {
+      arr.push.apply(arr, arr2);
+    }
+    
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data() {
+        return {
+            loading: false,
+            cities: [],
+            groups: [],
+            ids: [],
+            region: 1,
+            city_id: 151,
+            query: 'МБОУ',
+            count: 15
+        }
+      },
+      computed: {
+        excelData() {
+          if (!this.ids)
+            return;
+
+          return this.ids.map(x => ({id: x}))
+        }
+      },
+      methods: {
+        getGroups(city) {
+          instance.get(`groups.search?q=${this.query}&count=1000&country_id=1&city_id=${parseInt(this.city_id)}`)
+            .then(res => {
+              if (res.data.response.items.length) {
+                pushArray(this.groups, res.data.response.items.map(x=>x.id))
+
+                // Прошлись по всем  группам и забрали идентификаторы участников
+                var self = this
+                var len = this.count == 0 ? self.groups.length : this.count
+                this.groups.slice(0, len).forEach((group, i) => setTimeout(function(){ self.getUsers(group, i, len) }, i*400))
+              }
+            }) 
+        },
+        getUsers(group, i, len) {
+          instance.get(`groups.getMembers?group_id=${group}&count=1000&country_id=1`)
+            .then(res => {
+              if (res.data.response.items.length) {
+                pushArray(this.ids, res.data.response.items)
+              }
+
+              if (i === len-1) {
+                this.loading = false
+              }
+            })
+        },
+        start() {
+          this.loading = true
+          // Забрали все города из региона и получили идентификаторы городов
+          instance.get(`database.getCities?region_id=${this.region}&country_id=1&count=1000`)
+            .then(res => {
+              this.cities = res.data.response.items.map(x => x.id)
+                
+              // Прошлись по всем городам и нашли все группы с "МБОУ" и забрали идентификаторы групп
+              //this.cities.forEach((city, i) => setTimeout(function(){ getGroups(city, i) }, i*400));
+              this.getGroups(this.city_id)
+            })
+        }
+      }
+    })
+    </script>
+</body>
+</html>
