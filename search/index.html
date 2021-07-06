@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+      <v-app>
+        <v-main>
+          <v-alert
+            color="red"
+            type="error"
+            :value="showAlert"
+            :text="textAlert"
+          >Заполните алиас группы</v-alert>
+
+          <v-banner>
+            <v-row>
+              <v-col lg="2" md="3" sm="4" xs="12">
+                <v-text-field
+                  placeholder="Алиас группы"
+                  v-model="group"
+                  width="200"
+                  @input="groupChanged"
+                ></v-text-field>
+              </v-col>
+              <v-col lg="2" md="3" sm="4" xs="12">
+                <v-text-field
+                  v-model="filter.city" 
+                  placeholder="Город" 
+                ></v-text-field>
+              </v-col>
+              <v-col lg="2" md="3" sm="4" xs="12">
+                <v-text-field
+                  v-model="filter.year" 
+                  type="number" 
+                  placeholder="Год выпуска" 
+                ></v-text-field>
+              </v-col>
+              <v-col lg="4" md="3" sm="6" xs="8">
+                <v-row class="mt-auto mb-auto">
+                  <v-btn
+                    color="primary"
+                    class="ml-2"
+                    @click="getMembers"
+                  >Найти</v-btn>
+                  <v-btn
+                    color="primary"
+                    class="ml-2 mr-2"
+                    @click="items = []"
+                  >Сбросить</v-btn>
+                  <vue-json-to-csv
+                    :json-data="excelData"
+                    :csv-title="'Список'"
+                  >
+                    <v-btn color="success">
+                      Excel <i class="mdi mdi-export-variant" aria-hidden="true"></i>
+                    </v-btn>
+                  </vue-json-to-csv>
+                </v-row>
+              </v-col>
+            </v-row>
+          </v-banner>
+
+          <v-data-table
+            :headers="headers"
+            :items="items"
+            :items-per-page="-1"
+            class="elevation-1"
+            v-if="items.length"
+          >
+            <template v-slot:item.id="{ item }">
+              <a :href="'https://vk.com/id' + item.id" target="_blank">{{ item.id }}</a>
+            </template>
+
+            <template v-slot:item.photo="{ item }">
+              <v-img
+                :src="item.photo_100"
+                max-height="150"
+                max-width="150"
+                aspect-ratio="1"
+                class="grey lighten-2"
+              ></v-img>
+            </template>
+
+            <template v-slot:item.universities="{ item }">
+              <ol>
+                <li v-for="item in item.universities">
+                  {{ item.name }} | {{ item.graduation }} | {{ item.education_status }} | {{ item.faculty_name }}
+                </li>
+              </ol>
+            </template>
+        </v-data-table>
+        </v-main>
+      </v-app>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+    <script src="./vue-json-to-csv.min.js"></script>
+    
+    <script>
+    const instance = axios.create({
+      baseURL: "https://vk-api-proxy.xtrafrancyz.net/method/"
+    })
+
+    instance.defaults.params = {}
+    instance.defaults.params['access_token'] = "2722f3b14faca96c4d2115f748ccf32c8f90625faf13fcb965388538442ef6ce8af2e74633c71891a9bc5"
+    instance.defaults.params['v'] = "5.131"
+
+    Vue.use(VueJsonToCsv)
+
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data() {
+        return {
+          showAlert: false,
+          textAlert: '',
+          items: [],
+          group: '',
+          filter: {
+            groupId: '',
+            year: '',
+            city: ''
+          },
+          headers: [
+            {
+              text: 'ID',
+              value: 'id',
+            },
+            {
+              text: 'Город',
+              value: 'city.title'
+            },
+            {
+              text: 'Фото',
+              value: 'photo'
+            },
+            {
+              text: 'Имя',
+              sortable: true,
+              value: 'first_name',
+            },
+            {
+              text: 'Фамилия',
+              sortable: true,
+              value: 'last_name',
+            },
+            {
+              text: 'Образование',
+              sortable: true,
+              value: 'universities',
+            }
+          ],
+        }
+      },
+      computed: {
+        excelData() {
+          if (!this.items)
+            return;
+
+          return this.items.map(x => ({
+            id: `https://vk.com/id${x.id}`,
+            city: x.city ? x.city.title ? x.city.title : 'Неизвестно' : 'Неизвестно',
+            firstName: x.first_name,
+            lastName: x.last_name,
+            education: x.universities
+              .map((u, i) => (`${i}. ${u.name} | ${u.graduation} | ${u.education_status} | ${u.faculty_name}`))
+              .join('\r\n')
+          }))
+        }
+      },
+      methods: {
+        groupChanged() {
+          instance.get(`utils.resolveScreenName?screen_name=${this.group}`)
+            .then(res => {
+              this.filter.groupId = res.data.response.object_id
+            })
+        },
+        getMembers() {
+          if (!this.filter.groupId) {
+            this.showAlert = true
+            window.setInterval(() => {
+              this.showAlert = false
+            }, 2000) 
+            return
+          }
+
+          instance.get(`groups.getMembers?group_id=${this.filter.groupId}&count=1000&fields=city,photo_100,education,universities`)
+            .then(res => {
+              this.items = res.data.response.items.filter(x => 
+                x.hasOwnProperty('university_name') && 
+                x.hasOwnProperty('graduation') &&
+                x.hasOwnProperty('faculty_name') && 
+                x.hasOwnProperty('education_status')
+              )
+
+              if (this.filter.year) {
+                this.items = this.items.filter(x => x.graduation >= this.filter.year)
+              }
+
+              if (this.filter.city) {
+                this.items = this.items.filter(x => 
+                  x.hasOwnProperty('city') && 
+                  x.city.title.toLowerCase().includes((this.filter.city).toLowerCase())
+                )
+              }
+            })
+        }
+      },
+      created() {
+        if (this.group)
+          this.groupChanged()
+      }
+    })
+    </script>
+</body>
+</html>
